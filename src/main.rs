@@ -34,7 +34,7 @@ async fn get_forvaltere() -> Result<Vec<String>, Box<dyn std::error::Error>> {
    
         }
     }
-    
+
     Ok(forvaltere)
 }
 
@@ -61,6 +61,12 @@ mod tests {
             "Erling Haugan Kise".into()
         ];
         return forvaltere;
+    }
+
+    #[tokio::test]
+    async fn test_get_forvaltere_has_four_of_them(){
+        let forvaltere = get_forvaltere().await.unwrap();
+        assert_eq!(4, forvaltere.len());
     }
 
     #[tokio::test]
