@@ -1,5 +1,7 @@
 use scraper::Html;
 use scraper::Selector;
+use scraper::node::Node;
+
 
 #[tokio::main]
 async fn main() {
@@ -9,33 +11,48 @@ async fn main() {
 }
 
 
-async fn get_forvaltere() -> Vec<String> {
-    let html = reqwest::get("https://www.dnb.no/sparing/fond/dnb-teknologi").await.unwrap().text().await.unwrap();
+async fn get_forvaltere() -> Result<Vec<String>, Box<dyn std::error::Error>> {
+    let html = reqwest::get("https://www.dnb.no/sparing/fond/dnb-teknologi").await?.text().await?;
 
     let document = Html::parse_document(&html);
-    // print!("document: {:?}", document);
-    // print!("=====================");
-
-    // let h2_selector = Selector::parse("h2.dnb-heading").unwrap();
 
     println!("Forvaltere");
-    let ul_selector = Selector::parse("ul.dnb-ul").unwrap();
-    let li_selector = Selector::parse("li").unwrap();
+    let ul_selector = Selector::parse("ul.dnb-ul")?;
+    let li_selector = Selector::parse("li")?;
 
     let mut forvaltere : Vec<String> = Vec::new();
     for ul_element in document.select(&ul_selector) {
-        if ul_element.has_children() && ul_element.children().count() >= 4 {
-            for elelm in ul_element.select(&li_selector) {
-                let value = elelm.first_child().unwrap().value();
-                println!("value: {:?}", value.as_text());
-                forvaltere.push(value.as_text().unwrap().to_string().trim().to_string());
+        if ul_element.has_children() && ul_element.children().count() >= 3 {
+            for element in ul_element.select(&li_selector) {
+
+                match element.first_child() {
+                    Some(e) => {
+                        let node = e.value();
+                        if let Some(text) = extract_name(node){
+                            println!("Adding value: {:?}", text);
+                            forvaltere.push(text);
+                        }
+                    },
+                    None => {
+                        println!("None");
+                    }
+                }
             }
         }
    
     }
 
+    Ok(forvaltere)
+}
 
-    forvaltere
+fn extract_name(e:  &Node) -> Option<String> {
+    let text = e.as_text().unwrap().to_string();
+    println!("e: {:?}", text);
+    if !text.contains(":"){
+        return Some(text.trim().into());
+    }
+    println!("Skipping value with : {:?}", text);
+    return None;
 }
 
 #[cfg(test)]
@@ -56,7 +73,7 @@ mod tests {
     #[tokio::test]
     async fn test_get_dnb_teknologi_forvaltere_matches_expected_values() {
         let expected = get_excpected_forvaltere();
-        let actual = get_forvaltere().await;
+        let actual = get_forvaltere().await.unwrap();
         assert_eq!(expected, actual);
     }
 }
