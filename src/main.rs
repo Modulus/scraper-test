@@ -24,24 +24,17 @@ async fn get_forvaltere() -> Result<Vec<String>, Box<dyn std::error::Error>> {
     for ul_element in document.select(&ul_selector) {
         if ul_element.has_children() && ul_element.children().count() >= 3 {
             for element in ul_element.select(&li_selector) {
-
-                match element.first_child() {
-                    Some(e) => {
-                        let node = e.value();
-                        if let Some(text) = extract_name(node){
-                            println!("Adding value: {:?}", text);
-                            forvaltere.push(text);
-                        }
-                    },
-                    None => {
-                        println!("None");
+                if let Some(node) = element.first_child() {
+                    if let Some(text) = extract_name(node.value()){
+                        println!("Adding value: {:?}", text);
+                        forvaltere.push(text);
                     }
                 }
             }
-        }
    
+        }
     }
-
+    
     Ok(forvaltere)
 }
 
