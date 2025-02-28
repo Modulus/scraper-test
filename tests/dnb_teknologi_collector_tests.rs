@@ -16,9 +16,17 @@ fn get_excpected_forvaltere() -> Vec<String>{
 #[tokio::test]
 async fn test_get_html_returns_html(){
     let html = DnbTeknologiCollector::get_html("https://www.dnb.no/sparing/fond/dnb-teknologi").await.unwrap();
+
+    let forvaltere = get_excpected_forvaltere();
+
     assert!(html.len() > 0);
     assert!(html.contains("DNB Teknologi"));
     assert!(html.contains("Forvalterteamet i DNB Teknologi"));
+
+    assert!(html.contains(forvaltere[0].as_str()));
+    assert!(html.contains(forvaltere[1].as_str()));
+    assert!(html.contains(forvaltere[2].as_str()));
+    assert!(html.contains(forvaltere[3].as_str()));
 }
 
 #[tokio::test]
