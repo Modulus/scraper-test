@@ -5,16 +5,18 @@ use scraper::node::Node;
 use reqwest;
 
 pub struct DnbTeknologiCollector {
+    url: String
 }
 
 impl DnbTeknologiCollector {
     pub fn new() -> DnbTeknologiCollector {
         DnbTeknologiCollector {
+            url: "https://www.dnb.no/sparing/fond/dnb-teknologi".into()
         }
     }
 
     fn extract_name(e:  &Node) -> Option<String> {
-        let text = e.as_text().unwrap().to_string();
+        let text = e.as_text()?.to_string();
         println!("e: {:?}", text);
         if !text.contains(":"){
             return Some(text.trim().into());
@@ -31,7 +33,7 @@ impl DnbTeknologiCollector {
 
 impl StringDataCollector for DnbTeknologiCollector {
     async fn collect(&self) -> Result<Vec<String>, Box<dyn std::error::Error>> {
-        let html: String = DnbTeknologiCollector::get_html("https://www.dnb.no/sparing/fond/dnb-teknologi").await?;
+        let html: String = DnbTeknologiCollector::get_html(&self.url).await?;
 
         let document = Html::parse_document(&html);
 
@@ -75,6 +77,16 @@ mod tests {
     #[test]
     fn test_extract_name_has_invalid_input_returns_option_none(){
         let html = r#"<li>Forvaltere: </li>"#;
+        let document = Html::parse_document(html);
+        let selector = Selector::parse("li").unwrap();
+        let element = document.select(&selector).next().unwrap();
+        let name = DnbTeknologiCollector::extract_name(element.first_child().unwrap().value());
+        assert!(name.is_none());
+    }
+
+    #[test]
+    fn test_extract_name_has_empty_input_returns_option_none(){
+        let html = r#"<li><p></p></li>"#;
         let document = Html::parse_document(html);
         let selector = Selector::parse("li").unwrap();
         let element = document.select(&selector).next().unwrap();
