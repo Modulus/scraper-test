@@ -1133,7 +1133,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "scraper-test"
+name = "scraper_test"
 version = "0.1.0"
 dependencies = [
  "reqwest",

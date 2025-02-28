@@ -2,6 +2,7 @@ use super::base::StringDataCollector;
 use scraper::Html;
 use scraper::Selector;
 use scraper::node::Node;
+use reqwest;
 
 pub struct DnbTeknologiCollector {
 }
@@ -21,11 +22,16 @@ impl DnbTeknologiCollector {
         println!("Skipping value with : {:?}", text);
         return None;
     }
+
+    pub async fn get_html(url: &str) -> Result<String, Box<dyn std::error::Error>> {
+        let html: String = reqwest::get(url).await?.text().await?;
+        return Ok(html);
+    }
 }
 
 impl StringDataCollector for DnbTeknologiCollector {
     async fn collect(&self) -> Result<Vec<String>, Box<dyn std::error::Error>> {
-        let html: String = reqwest::get("https://www.dnb.no/privat/sparing-og-investering/fond/dnb-teknologi.html").await?.text().await?;
+        let html: String = DnbTeknologiCollector::get_html("https://www.dnb.no/sparing/fond/dnb-teknologi").await?;
 
         let document = Html::parse_document(&html);
 
@@ -66,19 +72,26 @@ mod tests {
         return forvaltere;
     }
 
-    #[tokio::test]
-    async fn test_get_forvaltere_has_four_of_them(){
-        let collector = DnbTeknologiCollector::new();
-        let forvaltere = collector.collect().await.unwrap();
-        assert_eq!(4, forvaltere.len());
+    #[test]
+    fn test_extract_name_has_valid_input_returns_name(){
+        let html = r#"<li>Anders Tandberg-Johansen</li>"#;
+        let document = Html::parse_document(html);
+        let selector = Selector::parse("li").unwrap();
+        let element = document.select(&selector).next().unwrap();
+        let name = DnbTeknologiCollector::extract_name(element.first_child().unwrap().value()).unwrap();
+        assert_eq!("Anders Tandberg-Johansen", name);
     }
 
-    #[tokio::test]
-    async fn test_get_dnb_teknologi_forvaltere_matches_expected_values() {
-        let expected = get_excpected_forvaltere();
-        let collector = DnbTeknologiCollector::new();
-        let actual = collector.collect().await.unwrap();
-        assert_eq!(expected, actual);
+    #[test]
+    fn test_extract_name_has_invalid_input_returns_option_none(){
+        let html = r#"<li>Forvaltere: </li>"#;
+        let document = Html::parse_document(html);
+        let selector = Selector::parse("li").unwrap();
+        let element = document.select(&selector).next().unwrap();
+        let name = DnbTeknologiCollector::extract_name(element.first_child().unwrap().value());
+        assert!(name.is_none());
     }
+
+
 }
 

@@ -1,5 +1,5 @@
 [package]
-name = "scraper-test"
+name = "scraper_test"
 version = "0.1.0"
 edition = "2021"
 
