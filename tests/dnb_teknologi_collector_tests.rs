@@ -18,7 +18,7 @@ async fn test_get_html_returns_html(){
     let html = DnbTeknologiCollector::get_html("https://www.dnb.no/sparing/fond/dnb-teknologi").await.unwrap();
     assert!(html.len() > 0);
     assert!(html.contains("DNB Teknologi"));
-    assert!(html.contains("Forvaltere"));
+    assert!(html.contains("Forvalterteamet i DNB Teknologi"));
 }
 
 #[tokio::test]

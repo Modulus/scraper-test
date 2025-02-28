@@ -60,17 +60,7 @@ impl StringDataCollector for DnbTeknologiCollector {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use tokio;
 
-    fn get_excpected_forvaltere() -> Vec<String>{
-        let forvaltere = vec![
-            "Anders Tandberg-Johansen".into(),
-            "Sverre Bergland".into(),
-            "Erling Thune".into(),
-            "Erling Haugan Kise".into()
-        ];
-        return forvaltere;
-    }
 
     #[test]
     fn test_extract_name_has_valid_input_returns_name(){
