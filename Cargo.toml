@@ -1,9 +1,10 @@
 [package]
-name = "scraper_test"
+name = "scraper-test"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
 reqwest = "0.12.12"
 scraper = "0.23.1"
+sqlx = { version = "0.8.3", features = ["sqlite"] }
 tokio = { version = "1.43.0", features = ["full"] }
