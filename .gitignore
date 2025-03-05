@@ -1,2 +1,3 @@
 /target
 db.sqlite
+db-test.sqlite

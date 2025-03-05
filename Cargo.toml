@@ -8,5 +8,5 @@ chrono = { version = "0.4.40", features = ["serde"] }
 mockall = "0.13.1"
 reqwest = "0.12.12"
 scraper = "0.23.1"
-sqlx = { version = "0.8.3", features = ["chrono", "sqlite"] }
+sqlx = { version = "0.8.3", features = ["chrono", "sqlite", "runtime-tokio"] }
 tokio = { version = "1.43.0", features = ["full"] }
