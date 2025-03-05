@@ -2,12 +2,11 @@ pub mod collectors;
 pub mod db;
 
 
-use chrono::Utc;
 use collectors::dnb_teknologi::DnbTeknologiCollector;
 use collectors::base::StringDataCollector;
 use db::managers::ForvalterManager;
 
-
+use sqlx::types::chrono::Utc;
 
 use sqlx::pool::PoolOptions;
 use sqlx::{Pool, Sqlite};

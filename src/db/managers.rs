@@ -1,8 +1,7 @@
 use std::sync::Arc;
 
-use chrono::{DateTime, Utc};
 use sqlx::{Pool, Sqlite};
-
+use sqlx::types::chrono::{Utc, DateTime};
 pub struct Forvalter {
     pub id: i64,
     pub company: String,

@@ -6,7 +6,6 @@ use sqlx::pool::PoolOptions;
 use sqlx::sqlite::SqliteConnectOptions;
 use sqlx::Pool;
 use sqlx::Sqlite;
-use chrono::Utc;
 use sqlx::SqlitePool;
 use std::process::Command;
 
