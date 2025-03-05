@@ -118,40 +118,50 @@ impl ForvalterManager {
 }
 
 
-// impl BaseManager for ForvalterManager {
+impl BaseForvalterManager for ForvalterManager {
 
-//     async fn create(&self, forvalter: Forvalter) -> Result<Forvalter, sqlx::Error> {
-//         let now = Utc::now();
-//         // let mut conn = self.pool.acquire().await?;
-//         let record = sqlx::query!(
-//             r#"
-//             INSERT INTO forvalter (company, name, added)
-//             VALUES (?, ?, ?)
-//             "#,
-//             forvalter.company,
-//             forvalter.name,
-//             now
-//         ).execute(&self.pool).await?;
+    async fn create(&self, forvalter: Forvalter) -> Result<Forvalter, sqlx::Error> {
+        let now = Utc::now();
+        // let mut conn = self.pool.acquire().await?;
+        let record = sqlx::query!(
+            r#"
+            INSERT INTO forvalter (id, name)
+            VALUES (?, ?)
+            "#,
+            forvalter.id,
+            forvalter.name,
+        ).execute(&self.pool).await?;
 
-//         Ok(Forvalter {
-//             id: record.last_insert_rowid() as i32,
-//             company: forvalter.company,
-//             name: forvalter.name,
-//             added: now
-//         })
-//     }
+        Ok(Forvalter {
+            id: record.last_insert_rowid() as i64,
+            company: "forvalter.company".into(),
+            name: forvalter.name,
+        })
+    }
 
 
-//     fn get(&self, id: i32) -> Result<Forvalter, sqlx::Error> {
-//         todo!()
-//     }
+    async fn get(&self, id: i64) -> Result<Forvalter, sqlx::Error> {
+        let result = sqlx::query!(
+            r#"
+            SELECT id, name FROM forvalter WHERE id = ?
+            "#,
+            id
+        ).fetch_one(&self.pool).await?;
+
+        Ok(Forvalter {
+            id: result.id,
+            name: result.name,
+            company: "forvalter.company".into(),
+            // added: result.added 
+        })
+    }
 
 
-//     fn update(&self, forvalter: Forvalter) -> Result<Forvalter, sqlx::Error> {
-//         todo!()
-//     }
+    // async fn update(&self, forvalter: Forvalter) -> Result<Forvalter, sqlx::Error> {
+    //     todo!()
+    // }
 
-//     fn delete(&self, id: i32) -> Result<(), sqlx::Error> {
-//         todo!()
-//     }
-// }
+    // async fn delete(&self, id: i32) -> Result<(), sqlx::Error> {
+    //     todo!()
+    // }
+}
