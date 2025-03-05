@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use chrono::{DateTime, Utc};
 use sqlx::{Pool, Sqlite};
 
@@ -5,18 +7,18 @@ pub struct Forvalter {
     pub id: i64,
     pub company: String,
     pub name: String,
-    pub added: DateTime<Utc>,
+    // pub added: DateTime<Utc>,
 }
-
+#[derive(Debug, PartialEq, Eq)]
 pub struct Company {
     pub id: i64,
     pub name: String,
-    pub added: Option<DateTime<Utc>>,
+    // pub added: DateTime<Utc>,
 }
 
 
 pub trait BaseForvalterManager {
-    
+
     fn create(&self, forvalter: Forvalter) ->  impl std::future::Future<Output = Result<Forvalter, sqlx::Error>> + Send;
     fn get(&self, id: i64) -> impl std::future::Future<Output = Result<Forvalter, sqlx::Error>> + Send;
     // fn update(&self, forvalter: Forvalter) -> impl std::future::Future<Output = Result<Forvalter, sqlx::Error>> + Send;
@@ -24,11 +26,11 @@ pub trait BaseForvalterManager {
 }
 
 pub trait BaseCompanyManager {
-    
+
     fn create(&self, forvalter: Company) ->  impl std::future::Future<Output = Result<Company, sqlx::Error>> + Send;
     fn get(&self, id: i64) -> impl std::future::Future<Output = Result<Company, sqlx::Error>> + Send;
     // fn update(&self, forvalter: Forvalter) -> impl std::future::Future<Output = Result<Forvalter, sqlx::Error>> + Send;
-    // fn delete(&self, id: i32) -> impl std::future::Future<Output = Result<Forvalter, sqlx::Error>> + Send;
+    fn delete(&self, id: i64) -> impl std::future::Future<Output = Result<bool, sqlx::Error>> + Send;
 }
 
 
@@ -56,25 +58,52 @@ impl BaseCompanyManager for CompanyManager {
     async fn create(&self, company: Company) ->  Result<Company, sqlx::Error> {
         let result = sqlx::query!(
             r#"
-            INSERT INTO company (org_nr, name, added)
-            VALUES (?, ?, ?)
+            INSERT INTO company (org_nr, name)
+            VALUES (?, ?)
             "#,
             company.id,
             company.name,
-            company.added
+            // company.added
         ).execute(&self.pool).await?;
 
 
         Ok(Company {
             id: result.last_insert_rowid() as i64,
             name: company.name,
-            added: company.added
+            // added: company.added
         })
 
     }
 
-    async fn get(&self, id: i64) -> Result<Company, sqlx::Error> {
-        todo!()
+    async fn get(&self, id: i64) -> Result<Company, sqlx::Error> { 
+        let result = sqlx::query!(
+            r#"
+            SELECT org_nr, name FROM company WHERE org_nr = ?
+            "#,
+            id
+        ).fetch_one(&self.pool).await?;
+
+        Ok(Company {
+            id: result.org_nr,
+            name: result.name,
+            // added: result.added 
+        })
+
+    }
+    
+    async fn delete(&self, id: i64) -> Result<bool, sqlx::Error> {
+        let rows_affected = sqlx::query!(
+            r#"
+            DELETE FROM company
+            WHERE org_nr = ?
+            "#,
+            id
+        )
+        .execute(&self.pool)
+        .await?
+        .rows_affected();
+    
+        Ok(rows_affected > 0)
     }
 }
 
