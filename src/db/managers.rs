@@ -119,7 +119,7 @@ impl ForvalterManager {
 
 
 impl BaseForvalterManager for ForvalterManager {
-
+    //TODO: Add fetch for company (org_nr) using name
     async fn create(&self, forvalter: Forvalter) -> Result<Forvalter, sqlx::Error> {
         let now = Utc::now();
         // let mut conn = self.pool.acquire().await?;
